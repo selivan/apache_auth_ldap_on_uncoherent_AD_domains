@@ -1,0 +1,29 @@
+# Apache 2.2
+LoadModule authn_alias_module /usr/lib/apache2/modules/authn_alias.so
+# Apache 2.4
+LoadModule authn_core_module /usr/lib/apache2/modules/mod_authn_core.so
+
+<AuthnProviderAlias ldap first-ldap>
+    AuthLDAPURL "ldap://win2003server:389/DC=first,DC=domain?sAMAccountName?sub?(objectClass=*)" NONE
+    AuthLDAPBindDN "cn=user1,cn=Users,dc=first,dc=domain"
+    AuthLDAPBindPassword "user1"
+</AuthnProviderAlias>
+
+<AuthnProviderAlias ldap second-ldap>
+    AuthLDAPURL "ldap://win2008server:3268/DC=second,DC=domain?sAMAccountName?sub?(objectClass=*)" NONE
+    AuthLDAPBindDN "cn=user2,cn=Users,dc=second,dc=domain"
+    AuthLDAPBindPassword "user2"
+</AuthnProviderAlias>
+
+<Location /test>
+
+    Order allow,deny
+    Allow from all
+
+    Authtype Basic
+    AuthBasicProvider first-ldap second-ldap
+    AuthName "TEST"
+    AuthzLDAPAuthoritative off
+    require valid-user
+
+</Location>
